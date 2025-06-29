@@ -197,8 +197,14 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       console.log('DEBUG: Sending document_ids:', documentIds);
       console.log('DEBUG: Selected files:', selectedFiles);
       console.log('DEBUG: Search scope:', searchScope);
+      console.log('DEBUG: Active session ID:', activeSessionId);
 
-      const response = await fetch('http://localhost:8000/api/chat/', {
+      // Build the URL with session_id if available
+      const url = activeSessionId
+        ? `http://localhost:8000/api/chat/?session_id=${activeSessionId}`
+        : 'http://localhost:8000/api/chat/';
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,6 +225,8 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
       console.log('DEBUG: Timing data:', result.timing);
       console.log('DEBUG: Timing data type:', typeof result.timing);
       console.log('DEBUG: Timing data keys:', result.timing ? Object.keys(result.timing) : 'null');
+      console.log('DEBUG: Response session_id:', result.session_id);
+      console.log('DEBUG: Current activeSessionId:', activeSessionId);
 
       // Remove typing message
       setMessages(prev => prev.filter(m => !m.isTyping));
@@ -244,8 +252,15 @@ const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
 
       // If a new session was created, update the session list and set it as active
       if (result.session_id && result.session_id !== activeSessionId) {
+        console.log('DEBUG: New session created, updating activeSessionId from', activeSessionId, 'to', result.session_id);
         setActiveSessionId(result.session_id);
         onSessionUpdate();
+      } else if (result.session_id) {
+        console.log('DEBUG: Using existing session ID:', result.session_id);
+        // Refresh the session list to get updated data
+        onSessionUpdate();
+      } else {
+        console.log('DEBUG: No session ID in response');
       }
 
     } catch (error) {

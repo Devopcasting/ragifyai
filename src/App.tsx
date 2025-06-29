@@ -267,7 +267,7 @@ function App() {
                 )}
                 {activeTab === 'chat' && (
                   <ChatInterface
-                    key={`chat-${activeSessionId || 'new'}-${clearChatFlag}`}
+                    key={`chat-${clearChatFlag}`}
                     files={files}
                     currentSession={currentSession}
                     activeSessionId={activeSessionId}

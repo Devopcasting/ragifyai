@@ -51,6 +51,10 @@ Please provide a comprehensive answer based on the context above. If the context
         llm_start_time = None
         llm_end_time = None
 
+        print(f"DEBUG: ChatService - received session_id: {session_id}")
+        print(
+            f"DEBUG: ChatService - chat_history_service available: {chat_history_service is not None}")
+
         try:
             # If no session exists but we have chat history service, create a new session
             if chat_history_service and session_id is None:
@@ -59,6 +63,13 @@ Please provide a comprehensive answer based on the context above. If the context
                     "..." if len(request.message) > 50 else request.message
                 session = chat_history_service.create_chat_session(title)
                 session_id = session.id
+                print(
+                    f"DEBUG: ChatService - created new session with ID: {session_id}")
+            elif session_id:
+                print(
+                    f"DEBUG: ChatService - using existing session ID: {session_id}")
+            else:
+                print(f"DEBUG: ChatService - no session ID and no chat history service")
 
             # Search for relevant document chunks
             document_ids = request.document_ids if request.document_ids is not None else []

@@ -17,6 +17,10 @@ async def chat(request: ChatRequest, session_id: Optional[int] = None, db: Sessi
     """Send a message and get AI response"""
     start_time = time.time()
     try:
+        print(f"DEBUG: Chat route - received session_id: {session_id}")
+        print(
+            f"DEBUG: Chat route - request message: {request.message[:50]}...")
+
         if not request.message.strip():
             raise HTTPException(
                 status_code=400, detail="Message cannot be empty")
