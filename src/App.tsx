@@ -138,6 +138,30 @@ function App() {
     }
   };
 
+  const clearAllSessions = async () => {
+    if (!confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/chat-history/sessions/clear-all', {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setChatSessions([]);
+        setActiveSessionId(null);
+        setCurrentSession(null);
+        alert('All chat history cleared successfully!');
+      } else {
+        alert('Error clearing chat history');
+      }
+    } catch (error) {
+      console.error('Error clearing all sessions:', error);
+      alert('Error clearing chat history');
+    }
+  };
+
   const handleFileUpload = (newFiles: FileData[]) => {
     setFiles(prev => [...prev, ...newFiles]);
     // Refresh files from database to ensure we have the latest data
@@ -197,6 +221,7 @@ function App() {
           onNewSession={createNewSession}
           onDeleteSession={deleteSession}
           onUpdateSessionTitle={updateSessionTitle}
+          onClearAllSessions={clearAllSessions}
         />
 
         {/* Right Main Content */}

@@ -9,6 +9,7 @@ interface ChatHistoryProps {
     onNewSession: () => void;
     onDeleteSession: (sessionId: number) => void;
     onUpdateSessionTitle: (sessionId: number, title: string) => void;
+    onClearAllSessions: () => void;
 }
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({
@@ -17,7 +18,8 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
     onSessionSelect,
     onNewSession,
     onDeleteSession,
-    onUpdateSessionTitle
+    onUpdateSessionTitle,
+    onClearAllSessions
 }) => {
     const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
     const [editingTitle, setEditingTitle] = useState('');
@@ -60,13 +62,24 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
             <div className="p-4 border-b border-gray-200/50">
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-semibold text-gray-900">Chat History</h3>
-                    <button
-                        onClick={onNewSession}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="New chat"
-                    >
-                        <Plus className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                        {sessions.length > 0 && (
+                            <button
+                                onClick={onClearAllSessions}
+                                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Clear all chat history"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
+                        <button
+                            onClick={onNewSession}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="New chat"
+                        >
+                            <Plus className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

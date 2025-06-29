@@ -74,6 +74,14 @@ def get_chat_sessions(db: Session = Depends(get_db)):
     return sessions
 
 
+@router.delete("/sessions/clear-all")
+def clear_all_chat_sessions(db: Session = Depends(get_db)):
+    """Clear all chat sessions and messages"""
+    service = ChatHistoryService(db)
+    success = service.clear_all_sessions()
+    return {"message": "All chat sessions cleared successfully"}
+
+
 @router.get("/sessions/{session_id}", response_model=ChatSessionWithMessages)
 def get_chat_session(session_id: int, db: Session = Depends(get_db)):
     """Get a specific chat session with messages"""

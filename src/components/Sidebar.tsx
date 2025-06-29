@@ -15,6 +15,7 @@ interface SidebarProps {
   onNewSession: () => void;
   onDeleteSession: (sessionId: number) => void;
   onUpdateSessionTitle: (sessionId: number, title: string) => void;
+  onClearAllSessions: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -27,7 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSessionSelect,
   onNewSession,
   onDeleteSession,
-  onUpdateSessionTitle
+  onUpdateSessionTitle,
+  onClearAllSessions
 }) => {
   const [fileStats, setFileStats] = useState({
     total_files: 0,
@@ -115,6 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onNewSession={onNewSession}
             onDeleteSession={onDeleteSession}
             onUpdateSessionTitle={onUpdateSessionTitle}
+            onClearAllSessions={onClearAllSessions}
           />
         </div>
       )}

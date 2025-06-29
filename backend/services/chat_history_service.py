@@ -63,3 +63,15 @@ class ChatHistoryService:
             self.db.commit()
             return True
         return False
+
+    def clear_all_sessions(self) -> bool:
+        """Clear all chat sessions and their messages"""
+        try:
+            # Delete all chat sessions (messages will be deleted due to cascade)
+            self.db.query(ChatSession).delete()
+            self.db.commit()
+            return True
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error clearing all sessions: {e}")
+            return False
