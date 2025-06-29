@@ -49,6 +49,13 @@ class ChatHistoryService:
         """Delete a chat session and all its messages"""
         session = self.get_chat_session(session_id)
         if session:
+            # Delete all messages for this session first
+            deleted_messages = self.db.query(ChatMessage).filter(
+                ChatMessage.session_id == session_id).delete()
+            print(
+                f"DEBUG: Deleted {deleted_messages} messages for session {session_id}")
+
+            # Delete the session
             self.db.delete(session)
             self.db.commit()
             return True
@@ -67,11 +74,28 @@ class ChatHistoryService:
     def clear_all_sessions(self) -> bool:
         """Clear all chat sessions and their messages"""
         try:
-            # Delete all chat sessions (messages will be deleted due to cascade)
-            self.db.query(ChatSession).delete()
+            print("DEBUG: Starting to clear all chat sessions...")
+
+            # Count sessions and messages before deletion
+            session_count = self.db.query(ChatSession).count()
+            message_count = self.db.query(ChatMessage).count()
+            print(
+                f"DEBUG: Found {session_count} sessions and {message_count} messages to delete")
+
+            # Delete all messages first (explicitly)
+            deleted_messages = self.db.query(ChatMessage).delete()
+            print(f"DEBUG: Deleted {deleted_messages} messages")
+
+            # Delete all chat sessions
+            deleted_sessions = self.db.query(ChatSession).delete()
+            print(f"DEBUG: Deleted {deleted_sessions} sessions")
+
             self.db.commit()
+
+            print(
+                f"DEBUG: Successfully deleted {deleted_sessions} sessions and {deleted_messages} messages")
             return True
         except Exception as e:
             self.db.rollback()
-            print(f"Error clearing all sessions: {e}")
+            print(f"ERROR: Error clearing all sessions: {e}")
             return False

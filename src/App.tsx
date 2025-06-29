@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import FileUpload from './components/FileUpload';
 import FileManager from './components/FileManager';
-import ChatInterface from './components/ChatInterface';
+import ChatInterface, { ChatInterfaceRef } from './components/ChatInterface';
 import SearchPanel from './components/SearchPanel';
 import LogViewer from './components/LogViewer';
 import { FileData, ChatSession, ChatSessionWithMessages } from './types';
@@ -17,6 +17,8 @@ function App() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [currentSession, setCurrentSession] = useState<ChatSessionWithMessages | null>(null);
+  const [clearChatFlag, setClearChatFlag] = useState<number>(0); // Force re-render when cleared
+  const chatInterfaceRef = useRef<ChatInterfaceRef>(null);
 
   // Load chat sessions on component mount
   useEffect(() => {
@@ -39,9 +41,11 @@ function App() {
 
   // Load current session when activeSessionId changes
   useEffect(() => {
+    console.log('DEBUG: activeSessionId changed to:', activeSessionId);
     if (activeSessionId) {
       loadChatSession(activeSessionId);
     } else {
+      console.log('DEBUG: Setting currentSession to null');
       setCurrentSession(null);
     }
   }, [activeSessionId]);
@@ -69,13 +73,19 @@ function App() {
 
   const loadChatSession = async (sessionId: number) => {
     try {
+      console.log('DEBUG: Loading chat session:', sessionId);
       const response = await fetch(`http://localhost:8000/api/chat-history/sessions/${sessionId}`);
       if (response.ok) {
         const session = await response.json();
+        console.log('DEBUG: Loaded session:', session);
         setCurrentSession(session);
+      } else {
+        console.log('DEBUG: Failed to load session, status:', response.status);
+        setCurrentSession(null);
       }
     } catch (error) {
       console.error('Error loading chat session:', error);
+      setCurrentSession(null);
     }
   };
 
@@ -149,9 +159,22 @@ function App() {
       });
 
       if (response.ok) {
+        // Clear all session-related state
         setChatSessions([]);
         setActiveSessionId(null);
         setCurrentSession(null);
+        setClearChatFlag(prev => prev + 1);
+
+        // Force clear messages in ChatInterface
+        if (chatInterfaceRef.current) {
+          chatInterfaceRef.current.clearMessages();
+        }
+
+        // Force a small delay to ensure state updates are processed
+        setTimeout(() => {
+          console.log('DEBUG: Chat history cleared, state reset complete');
+        }, 100);
+
         alert('All chat history cleared successfully!');
       } else {
         alert('Error clearing chat history');
@@ -244,11 +267,14 @@ function App() {
                 )}
                 {activeTab === 'chat' && (
                   <ChatInterface
+                    key={`chat-${activeSessionId || 'new'}-${clearChatFlag}`}
                     files={files}
                     currentSession={currentSession}
                     activeSessionId={activeSessionId}
                     onSessionUpdate={loadChatSessions}
                     setActiveSessionId={setActiveSessionId}
+                    clearChatFlag={clearChatFlag}
+                    ref={chatInterfaceRef}
                   />
                 )}
                 {activeTab === 'logs' && (

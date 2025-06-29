@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Send, Bot, User, FileText, Loader2, Filter, X, Check } from 'lucide-react';
 import { ChatMessage, FileData, ChatSessionWithMessages } from '../types';
 
@@ -8,15 +8,21 @@ interface ChatInterfaceProps {
   activeSessionId: number | null;
   onSessionUpdate: () => void;
   setActiveSessionId: (sessionId: number | null) => void;
+  clearChatFlag?: number;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({
+export interface ChatInterfaceRef {
+  clearMessages: () => void;
+}
+
+const ChatInterface = forwardRef<ChatInterfaceRef, ChatInterfaceProps>(({
   files,
   currentSession,
   activeSessionId,
   onSessionUpdate,
-  setActiveSessionId
-}) => {
+  setActiveSessionId,
+  clearChatFlag = 0
+}, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +33,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   // Load messages from current session
   useEffect(() => {
+    console.log('DEBUG: ChatInterface useEffect - currentSession:', currentSession);
+    console.log('DEBUG: ChatInterface useEffect - activeSessionId:', activeSessionId);
+
+    // Force clear messages first
+    setMessages([]);
+
     if (currentSession) {
       const sessionMessages: ChatMessage[] = currentSession.messages.map(msg => ({
         id: msg.id.toString(),
@@ -40,7 +52,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }));
       setMessages(sessionMessages);
     } else {
-      // Default welcome message when no session is active
+      // Clear messages and show default welcome message when no session is active
       setMessages([{
         id: '1',
         type: 'assistant',
@@ -50,7 +62,69 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         timestamp: new Date(),
       }]);
     }
-  }, [currentSession, files.length]);
+  }, [currentSession, files.length, activeSessionId]);
+
+  // Force clear messages when there's no active session
+  useEffect(() => {
+    if (!activeSessionId && !currentSession) {
+      console.log('DEBUG: Force clearing messages - no active session');
+      setMessages([{
+        id: '1',
+        type: 'assistant',
+        content: files.length > 0
+          ? `Hello! I'm ready to help you analyze your ${files.length} uploaded document${files.length !== 1 ? 's' : ''}. Just start typing your question below and I'll automatically save our conversation. You can ask questions about all your files or specify particular documents. What would you like to know?`
+          : "Hello! I don't see any uploaded documents yet. Please upload some files first using the 'Upload Files' tab, then come back here to start asking questions about your documents. Your conversations will be automatically saved.",
+        timestamp: new Date(),
+      }]);
+    }
+  }, [activeSessionId, currentSession, files.length]);
+
+  // Additional force clear when component mounts or when switching to chat tab
+  useEffect(() => {
+    console.log('DEBUG: ChatInterface component mounted/updated');
+    if (!currentSession) {
+      console.log('DEBUG: No current session, clearing messages');
+      setMessages([{
+        id: '1',
+        type: 'assistant',
+        content: files.length > 0
+          ? `Hello! I'm ready to help you analyze your ${files.length} uploaded document${files.length !== 1 ? 's' : ''}. Just start typing your question below and I'll automatically save our conversation. You can ask questions about all your files or specify particular documents. What would you like to know?`
+          : "Hello! I don't see any uploaded documents yet. Please upload some files first using the 'Upload Files' tab, then come back here to start asking questions about your documents. Your conversations will be automatically saved.",
+        timestamp: new Date(),
+      }]);
+    }
+  }, []); // Run only on mount
+
+  // Force clear messages when clearChatFlag changes
+  useEffect(() => {
+    console.log('DEBUG: clearChatFlag changed to:', clearChatFlag);
+    if (clearChatFlag > 0) {
+      console.log('DEBUG: Force clearing messages due to clearChatFlag');
+      setMessages([{
+        id: '1',
+        type: 'assistant',
+        content: files.length > 0
+          ? `Hello! I'm ready to help you analyze your ${files.length} uploaded document${files.length !== 1 ? 's' : ''}. Just start typing your question below and I'll automatically save our conversation. You can ask questions about all your files or specify particular documents. What would you like to know?`
+          : "Hello! I don't see any uploaded documents yet. Please upload some files first using the 'Upload Files' tab, then come back here to start asking questions about your documents. Your conversations will be automatically saved.",
+        timestamp: new Date(),
+      }]);
+    }
+  }, [clearChatFlag, files.length]);
+
+  // Expose clearMessages function to parent component
+  useImperativeHandle(ref, () => ({
+    clearMessages: () => {
+      console.log('DEBUG: clearMessages called via ref');
+      setMessages([{
+        id: '1',
+        type: 'assistant',
+        content: files.length > 0
+          ? `Hello! I'm ready to help you analyze your ${files.length} uploaded document${files.length !== 1 ? 's' : ''}. Just start typing your question below and I'll automatically save our conversation. You can ask questions about all your files or specify particular documents. What would you like to know?`
+          : "Hello! I don't see any uploaded documents yet. Please upload some files first using the 'Upload Files' tab, then come back here to start asking questions about your documents. Your conversations will be automatically saved.",
+        timestamp: new Date(),
+      }]);
+    }
+  }), [files.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -500,6 +574,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ChatInterface;

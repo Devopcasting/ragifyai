@@ -77,9 +77,16 @@ def get_chat_sessions(db: Session = Depends(get_db)):
 @router.delete("/sessions/clear-all")
 def clear_all_chat_sessions(db: Session = Depends(get_db)):
     """Clear all chat sessions and messages"""
+    print("DEBUG: Received request to clear all chat sessions")
     service = ChatHistoryService(db)
     success = service.clear_all_sessions()
-    return {"message": "All chat sessions cleared successfully"}
+    if success:
+        print("DEBUG: Successfully cleared all chat sessions")
+        return {"message": "All chat sessions cleared successfully"}
+    else:
+        print("ERROR: Failed to clear all chat sessions")
+        raise HTTPException(
+            status_code=500, detail="Failed to clear chat sessions")
 
 
 @router.get("/sessions/{session_id}", response_model=ChatSessionWithMessages)
