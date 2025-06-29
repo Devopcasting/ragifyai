@@ -63,6 +63,12 @@ Please provide a comprehensive answer based on the context above. If the context
             # Search for relevant document chunks
             document_ids = request.document_ids if request.document_ids is not None else []
             search_start_time = time.time()
+
+            print(f"DEBUG: Received document_ids: {document_ids}")
+            print(f"DEBUG: Document IDs type: {type(document_ids)}")
+            print(
+                f"DEBUG: Document IDs length: {len(document_ids) if document_ids else 0}")
+
             try:
                 search_results = document_processor.search_documents(
                     query=request.message,
@@ -70,6 +76,10 @@ Please provide a comprehensive answer based on the context above. If the context
                     limit=5  # Get top 5 most relevant chunks
                 )
                 search_end_time = time.time()
+
+                print(
+                    f"DEBUG: Search returned {len(search_results) if search_results else 0} results")
+
             except Exception as search_error:
                 search_end_time = time.time()
                 error_msg = str(search_error)

@@ -110,11 +110,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     try {
       // Prepare document IDs for the request
-      const documentIds = searchScope === 'selected' && selectedFiles.length > 0
-        ? selectedFiles
-        : undefined;
+      // Convert file IDs to filenames since backend expects filenames as "source" in ChromaDB
+      let documentIds: string[] | undefined = undefined;
+      if (searchScope === 'selected' && selectedFiles.length > 0) {
+        documentIds = selectedFiles.map(fileId => {
+          const file = files.find(f => f.id === fileId);
+          return file ? file.name : fileId; // Use filename if found, fallback to fileId
+        });
+      }
 
       // Call the backend chat API - it will auto-create session if needed
+      console.log('DEBUG: Sending document_ids:', documentIds);
+      console.log('DEBUG: Selected files:', selectedFiles);
+      console.log('DEBUG: Search scope:', searchScope);
+
       const response = await fetch('http://localhost:8000/api/chat/', {
         method: 'POST',
         headers: {

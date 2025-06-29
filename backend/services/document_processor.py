@@ -272,6 +272,10 @@ class DocumentProcessor:
             where_clause = None
             if document_ids:
                 where_clause = {"source": {"$in": document_ids}}
+                print(f"DEBUG: Using where clause: {where_clause}")
+                print(f"DEBUG: Document IDs for filtering: {document_ids}")
+            else:
+                print("DEBUG: No document filtering - searching all documents")
 
             # Try different search parameters if the first attempt fails
             search_attempts = [
