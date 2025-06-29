@@ -1,0 +1,53 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+
+# Public folder - keep structure but exclude uploaded documents
+public/documents/pdf/*
+public/documents/txt/*
+public/documents/docx/*
+public/documents/other/*
+
+# Keep the folder structure by adding .gitkeep files
+!public/documents/pdf/.gitkeep
+!public/documents/txt/.gitkeep
+!public/documents/docx/.gitkeep
+!public/documents/other/.gitkeep
+
+# Backend specific ignores
+backend/uploads/*
+backend/chroma_db/*
+backend/logs/*
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep backend folder structure
+!backend/uploads/.gitkeep
+!backend/chroma_db/.gitkeep
+!backend/logs/.gitkeep
+
+# Frontend config - exclude sensitive files but keep folder structure
+src/config/gcp.json

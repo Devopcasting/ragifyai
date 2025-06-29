@@ -1,0 +1,3 @@
+# This file ensures the config folder is tracked in git
+# The gcp.json file is excluded for security reasons
+# Add other configuration files here as needed 
